@@ -5,6 +5,8 @@
 #include "hash_table.h"
 #include "prime.h"
 
+static int HT_PRIME_1 = 97;
+static int HT_PRIME_2 = 61;
 static int HT_INITIAL_BASE_SIZE = 53;
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
 
@@ -44,12 +46,12 @@ static void ht_del_item(ht_item* i) {
 }
 
 static ht_hash_table* ht_new_sized(const int base_size) {
-  ht_hash_table* ht = xmalloc(sizeof(ht_hash_table));
+  ht_hash_table* ht = malloc(sizeof(ht_hash_table));
 
   ht->base_size = base_size;
   ht->size = next_prime(ht->base_size);
   ht->count = 0;
-  ht->items = xcalloc((size_t)ht->size, sizeof(ht_item*));
+  ht->items = calloc((size_t)ht->size, sizeof(ht_item*));
 
   return ht;
 }
@@ -111,14 +113,14 @@ void ht_del_hash_table(ht_hash_table* ht) {
 }
 
 void ht_insert(ht_hash_table* ht, const char* key, const char* value) {
+  int index;
+  ht_item* cur_item = NULL;
+
   const int load = ht->count * 100 / ht->size;
 
   if (load > 70) {
     ht_resize_up(ht);
   }
-
-  int index;
-  ht_item* cur_item;
 
   ht_item* item = ht_new_item(key, value);
 
@@ -140,7 +142,7 @@ void ht_insert(ht_hash_table* ht, const char* key, const char* value) {
 
 char* ht_search(ht_hash_table* ht, const char* key) {
   int index;
-  ht_item* item;
+  ht_item* item = NULL;
 
   for (int i = 0; item != NULL; i++) {
     index = ht_get_hash(key, ht->size, 0);
@@ -155,14 +157,14 @@ char* ht_search(ht_hash_table* ht, const char* key) {
 }
 
 void ht_delete(ht_hash_table* ht, const char* key) {
+  int index;
+  ht_item* item = NULL;
+
   const int load = ht->count * 100 / ht->size;
 
   if (load < 10) {
     ht_resize_down(ht);
   }
-
-  int index;
-  ht_item* item;
 
   for (int i = 0; item != NULL; i++) {
     index = ht_get_hash(key, ht->size, i);
